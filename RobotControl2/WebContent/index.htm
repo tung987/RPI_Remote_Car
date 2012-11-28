@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link href="css/ui-lightness/jquery-ui-1.9.2.custom.min.css"
+	rel="stylesheet" type="text/css" />
+<style type="text/css">
+	body {font-size: 10px;}
+	button{width:100%}
+	table{width:100%}
+    #slider { margin: 10px; }
+    #div_image { clear: both; margin:5px; width:90% }
+    #split_left { float:left; margin:5px; width:45%}
+	#split_right { float:left; margin:5px; width:45%}
+	#split_debugs { clear: both; margin:5px; width:90%}
+	#debug_msg {overflow: auto;width:100%;height:150px;}
+</style>
+	
+<script src="js/jquery-1.8.3.min.js"></script>
+<script src="js/jquery-ui-1.9.2.custom.min.js"></script>
+
+<script>
+	doAction = function(type, motion, speed) {
+		$.ajax({
+			url : 'GPIO.Control?type=' + type + '&motion=' + motion + (speed != '' ? '&speed=' + speed : "" ),
+			type : 'GET',
+			dataType: 'text',
+			data : {
+			},
+			error : function(xhr) {
+				appendDebugMsg('red', "ERROR Ajax : " + type + " " + motion + " " + response);
+			},
+			success : function(response) {
+				appendDebugMsg('green', "INFO Ajax : " + type + " " + motion + " " + response);
+			}
+		});
+	};
+		
+	appendDebugMsg = function(color, msg) {
+		$('#debug_msg').append("<span style='color: " + color + ";'>" + msg + "</span><br>");
+		$('#debug_msg').prop({scrollTop: $("#debug_msg").prop("scrollHeight")});
+
+	};
+
+	$(document).ready(function() {
+		$("button").button();
+		
+		var camLink = 'http://' + window.location.hostname + ':8081/?action=stream';
+		//var camLink = 'images/cam_img.jpg';
+		$("#cam_img").attr("src", camLink);
+		
+
+		$("#move_up").mouseup(function() {
+			appendDebugMsg('blue', 'INFO Onclick : move_up up.');
+			doAction("MOVE", "RESET");
+		}).mousedown(function() {
+			appendDebugMsg('blue', 'INFO Onclick : move_up down.');
+			doAction("MOVE", "UP");
+		});
+
+		$("#move_left").mouseup(function() {
+			appendDebugMsg('blue', 'INFO Onclick : move_left up.');
+			doAction("MOVE", "RESET");
+		}).mousedown(function() {
+			appendDebugMsg('blue', 'INFO Onclick : move_left down.');
+			doAction("MOVE", "LEFT");
+		});
+
+		$("#move_right").mouseup(function() {
+			appendDebugMsg('blue', 'INFO Onclick : move_right up.');
+			doAction("MOVE", "RESET");
+		}).mousedown(function() {
+			appendDebugMsg('blue', 'INFO Onclick : move_right down.');
+			doAction("MOVE", "RIGHT");
+		});
+
+		$("#move_down").mouseup(function() {
+			appendDebugMsg('blue', 'INFO Onclick : move_down up.');
+			doAction("MOVE", "RESET");
+		}).mousedown(function() {
+			appendDebugMsg('blue', 'INFO Onclick : move_down down.');
+			doAction("MOVE", "DOWN");
+		});
+		
+		$("#move_reset").mouseup(function() {
+			appendDebugMsg('blue', 'INFO Onclick : move_down up.');
+			doAction("MOVE", "RESET");
+		});
+		
+		$( "#motor_pwm_speed_slider" ).slider({
+			range: "min",
+			min: 0,
+			max: 100,
+			step: 5,
+			value: 50,
+			slide : function( event, ui ) {
+				$( "#motor_pwm_speed" ).val( ui.value );
+			},
+			change : function( event, ui ) {
+				appendDebugMsg('blue', 'INFO motor_pwm_speed_slider : ' + command);
+			}
+		});
+		
+		$("#move_pwm_up").mouseup(function() {
+			appendDebugMsg('blue', 'INFO Onclick : pwm_move_up up.');
+			doAction("PWM_MOVE", "RESET");
+		}).mousedown(function() {
+			appendDebugMsg('blue', 'INFO Onclick : pwm_move_up down.');
+			doAction("PWM_MOVE", "UP", $( "#motor_pwm_speed_slider" ).slider( "option", "value" ));
+		});
+
+		$("#move_pwm_left").mouseup(function() {
+			appendDebugMsg('blue', 'INFO Onclick : pwm_move_left up.');
+			doAction("PWM_MOVE", "RESET");
+		}).mousedown(function() {
+			appendDebugMsg('blue', 'INFO Onclick : pwm_move_left down.');
+			doAction("PWM_MOVE", "LEFT", $( "#motor_pwm_speed_slider" ).slider( "option", "value" ));
+		});
+
+		$("#move_pwm_right").mouseup(function() {
+			appendDebugMsg('blue', 'INFO Onclick : pwm_move_right up.');
+			doAction("PWM_MOVE", "RESET");
+		}).mousedown(function() {
+			appendDebugMsg('blue', 'INFO Onclick : pwm_move_right down.');
+			doAction("PWM_MOVE", "RIGHT", $( "#motor_pwm_speed_slider" ).slider( "option", "value" ));
+		});
+
+		$("#move_pwm_down").mouseup(function() {
+			appendDebugMsg('blue', 'INFO Onclick : pwm_move_down up.');
+			doAction("PWM_MOVE", "RESET");
+		}).mousedown(function() {
+			appendDebugMsg('blue', 'INFO Onclick : pwm_move_down down.');
+			doAction("PWM_MOVE", "DOWN", $( "#motor_pwm_speed_slider" ).slider( "option", "value" ));
+		});
+		
+		$("#move_pwm_reset").mouseup(function() {
+			appendDebugMsg('blue', 'INFO Onclick : move_down up.');
+			doAction("PWM_MOVE", "RESET");
+		});
+				
+		var isUPKeydown = false;
+		var isDownKeydown = false;
+		var isLeftKeydown = false;
+		var isRightKeydown = false;
+		$("body").keyup(function(event) {
+			
+			if (isUPKeydown && event.which == 38 ) {
+				appendDebugMsg('blue', 'INFO Keyup : ' + event.which);
+				doAction("MOVE", "RESET");
+				isUPKeydown = false;
+			}else if (isDownKeydown && event.which == 40 ) {
+				appendDebugMsg('blue', 'INFO Keyup : ' + event.which);
+				doAction("MOVE", "RESET");
+				isDownKeydown = false;
+			}else if (isLeftKeydown && event.which == 37 ) {
+				appendDebugMsg('blue', 'INFO Keyup : ' + event.which);
+				doAction("MOVE", "RESET");
+				isLeftKeydown = false;
+			}else if (isRightKeydown && event.which == 39 ) {
+				appendDebugMsg('blue', 'INFO Keyup : ' + event.which);
+				doAction("MOVE", "RESET");
+				isRightKeydown = false;
+			}
+		}).keydown(function() {
+			if(!isUPKeydown && !isDownKeydown && !isLeftKeydown && !isRightKeydown){
+				if ( event.which == 38 ) {
+					appendDebugMsg('blue', 'INFO Keydown : ' + event.which);
+					doAction("MOVE", "UP");
+					isUPKeydown = true;
+				}else if ( event.which == 40 ) {
+					appendDebugMsg('blue', 'INFO Keydown : ' + event.which);
+					doAction("MOVE", "DOWN");
+					isDownKeydown = true;
+				}else if ( event.which == 37 ) {
+					appendDebugMsg('blue', 'INFO Keydown : ' + event.which);
+					doAction("MOVE", "LEFT");
+					isLeftKeydown = true;
+				}else if ( event.which == 39 ) {
+					appendDebugMsg('blue', 'INFO Keydown : ' + event.which);
+					doAction("MOVE", "RIGHT");
+					isRightKeydown = true;
+				}
+			}
+		});
+		
+		$( "#up_down_angle_slider" ).slider({
+			range: "min",
+			min: 500,
+			max: 2050,
+			step: 50,
+			value: 1900,
+			slide : function( event, ui ) {
+				$( "#up_down" ).val( ui.value );
+			},
+			change : function( event, ui ) {
+				var timer = $( "#up_down_speed_slider" ).slider( "option", "value" );
+				var command = "1P" + ui.value + "T" + timer;
+				
+				doAction("SERVO", command);
+				
+				appendDebugMsg('blue', 'INFO up_down_angle_slider : ' + command);
+			}
+		})
+		$( "#up_down_speed_slider" ).slider({
+			range: "min",
+			min: 100,
+			max: 9999,
+			step: 50,
+			value: 1000,
+			slide : function( event, ui ) {
+				$( "#up_down_speed" ).val( ui.value );
+			},
+			change : function( event, ui ) {
+				//$( "#amount" ).val( ui.value );
+				appendDebugMsg('blue', 'INFO up_down_speed_slider : ' + ui.value);
+			}
+		})
+		$("#up_down_cam_defult").mousedown(function() {
+			appendDebugMsg('blue', 'INFO Onclick : up_down_cam_defult.');
+			
+			$("#up_down_speed_slider").slider("option", "value", "1000");
+			$("#up_down_angle_slider").slider("option", "value", "1900");
+			
+			$( "#up_down_speed" ).val( "1000" );
+			$( "#up_down" ).val( "1900" );
+		});
+		
+		$( "#left_right_angle_slider" ).slider({
+			range: "min",
+			min: 500,
+			max: 2500,
+			step: 50,
+			value: 1500,
+			slide : function( event, ui ) {
+				$( "#left_right" ).val( ui.value );
+			},
+			change : function( event, ui ) {
+				var timer = $( "#left_right_speed_slider" ).slider( "option", "value" );
+				var command = "2P" + ui.value + "T" + timer;
+				
+				doAction("SERVO", command);
+				
+				appendDebugMsg('blue', 'INFO left_right_angle_slider : ' + command);
+			}
+		})
+		$( "#left_right_speed_slider" ).slider({
+			range: "min",
+			min: 100,
+			max: 9999,
+			step: 50,
+			value: 1000,
+			slide : function( event, ui ) {
+				$( "#left_right_speed" ).val( ui.value );
+			},
+			change : function( event, ui ) {
+				//$( "#amount" ).val( ui.value );
+				appendDebugMsg('blue', 'INFO left_right_speed_slider : ' + ui.value);
+			}
+		})
+		$("#left_right_cam_defult").mousedown(function() {
+			appendDebugMsg('blue', 'INFO Onclick : left_right_cam_defult.');
+			$("#left_right_speed_slider").slider("option", "value", "1000");
+			$("#left_right_angle_slider").slider("option", "value", "1500");
+			
+			$( "#left_right_speed" ).val( "1000" );
+			$( "#left_right" ).val( "1500" );
+		});
+
+	});
+</script>
+</head>
+<body>
+	<div>
+		<div id="div_image">
+			<img id="cam_img" src="" />
+		</div>
+		<div id="split_left">
+			<h1 class="ui-widget-content">Move</h1>
+			<table id="move_group" >
+				<tr>
+					<td></td>
+					<td><button id="move_up">UP</button></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td><button id="move_left">LEFT</button></td>
+					<td><button id="move_reset">RESET</button></td>
+					<td><button id="move_right">RIGHT</button></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><button id="move_down">DOWN</button></td>
+					<td></td>
+				</tr>
+			</table>
+			<h1 class="ui-widget-content">PWM Move</h1>
+			<div>
+				<p><label for="up_down_speed">PWM Speed :</label><input type="text" id="motor_pwm_speed" style="border:0; color:#f6931f; font-weight:bold;" /></p>
+				<div id="motor_pwm_speed_slider"></div>
+				<br>
+				<table id="move_pwm_group" >
+					<tr>
+						<td></td>
+						<td><button id="move_pwm_up">UP</button></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td><button id="move_pwm_left">LEFT</button></td>
+						<td><button id="move_pwm_reset">RESET</button></td>
+						<td><button id="move_pwm_right">RIGHT</button></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td><button id="move_pwm_down">DOWN</button></td>
+						<td></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<div id="split_right">
+			<h1 class="ui-widget-content">Cam</h1>
+			<!--<button id="take_picture">TAKE PICTURE</button>-->
+			<fieldset>
+				<p><label for="up_down">Up Down :</label><input type="text" id="up_down" style="border:0; color:#f6931f; font-weight:bold;" /></p>
+				<div id="up_down_angle_slider"></div>
+				
+				<p><label for="up_down_speed">Speed :</label><input type="text" id="up_down_speed" style="border:0; color:#f6931f; font-weight:bold;" /></p>
+				<div id="up_down_speed_slider"></div>
+				<br>
+				<button id="up_down_cam_defult">Defult</button>
+			</fieldset>
+			
+			<fieldset>
+				<p><label for="left_right">Left Right :</label><input type="text" id="left_right" style="border:0; color:#f6931f; font-weight:bold;" /></p>
+				<div id="left_right_angle_slider"></div>
+				
+				<p><label for="left_right_speed">Speed :</label><input type="text" id="left_right_speed" style="border:0; color:#f6931f; font-weight:bold;" /></p>
+				<div id="left_right_speed_slider"></div>
+				<br>
+				<button id="left_right_cam_defult">Defult</button>
+			</fieldset>
+		</div>
+		
+		<div id="split_debugs">
+			<h1 class="ui-widget-content">Debug</h1>
+			<div id="debug_msg" ></div>
+		</div>
+	</div>
+</body>
+</html>
